@@ -5,16 +5,13 @@ import java.util.ArrayList;
 public class Pawn extends Piece{
 	private int movingDirection;
 	
-	public Pawn(int player, ChessGame game, Board board, Square square) {
-		super(player, game, board, square);
+	public Pawn(int player, ChessGame game, Square square) {
+		super(player, game, square);
 		movingDirection = (player == 0) ? -1 : 1;
 		symbol = colors[player] + "P";
 	}
 	
-	public void promote(Piece piece){
-		this.square().clear();
-		this.square().placePiece(piece);
-	}
+	public int imageIndex() { return 0 + player(); }
 	
 	@Override 
 	public ArrayList<Square> killMoves(ArrayList<Piece> pieces) {

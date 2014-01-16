@@ -5,14 +5,23 @@ import java.util.ArrayList;
 public class King extends Piece{
 	boolean hasMoved;
 	
-	public King(int player, ChessGame game, Board board, Square square){
-		super(player, game, board, square);
+	public King(int player, ChessGame game, Square square){
+		super(player, game, square);
 		symbol = colors[player] + "K";
 		hasMoved = false;
 	}
 	
+	public int imageIndex() { return 10 + player(); }
+	
 	public boolean hasMoved() {
 		return hasMoved;
+	}
+	
+	// To get passed an infinite loop caused by isMated and castling.  Don't forget the '!'!
+	@Override   
+	public boolean canMove(ArrayList<Piece> pieces) {
+		System.out.println(super.legalMoves(pieces));
+		return !super.legalMoves(pieces).isEmpty();
 	}
 	
 	@Override
@@ -24,13 +33,12 @@ public class King extends Piece{
 		// go through a 1-nearest neighbour square around the king and
 		// make sure it is on the board, then remove the current position.
 		for (int i=-1;i<=1;i++){
-			if (row+i >= 0 && row+i <= 7){
+			if (row+i >= 0 && row+i <= 7) {
 				for (int j=-1;j<=1;j++){
-					if (column+j >= 0 && column+j <= 7){
-
-						//System.out.println("i: "+(row+i)+", j: "+(column+j));
+					if (column+j >= 0 && column+j <= 7) {
 						Square destination = board().square(row+i, column+j);
 						Piece piece = destination.piece();
+						
 						if (!destination.isOccupied()) {
 							moves.add(destination);
 						}
@@ -44,17 +52,11 @@ public class King extends Piece{
 		
 		moves.remove(this.square());
 		
-		// castling
-//		if (!game().movedPieces().contains(this)) {
-//			addCastling(0,-1,moves);
-//			addCastling(7,1,moves);
-//		}
-		
 		return moves;
 	}
 	
 	@Override
-	// When castling was added in moves it caused problems 
+	// When castling was added in moves it caused problems of infinite looping. Solved.
 	public ArrayList<Square> legalMoves(ArrayList<Piece> pieces){
 		
 		ArrayList<Square> legalMoves = new ArrayList<Square>();
@@ -78,51 +80,29 @@ public class King extends Piece{
 	// that the enemy king doesn't check the squares that the king passes through.
 	// Except when checking if a king is mated! Since it calls legalMoves rather than moves.
 	// Think about it and solve it!
+	// This is solved, read other comments.
 	private void addCastling(int border, int increment, ArrayList<Square> moves) {
 		Square probe = board().square(this.row(), this.column());
 		ArrayList<Piece> pieces = new ArrayList<Piece>();
-		Piece enemyKing = game().king((player()+1)%2);
+		
 		for (Piece piece : game().pieces()) {
 			pieces.add(piece);
 		}
-		pieces.remove(enemyKing);
+
 		if (probe.isChecked(this, pieces)) { return; }
-//		System.out.println("a");
-//		System.out.println(probe);
+		
 		for (int i=1;i<=2;i++) {
-//			System.out.println(i);
 			probe = board().square(probe.row(), probe.column()+increment);
-//			System.out.println(probe);
 			if (probe.isOccupied() || probe.isChecked(this, pieces)) { return; }
 		}
-//		System.out.println("b");
-//		System.out.println(probe);
+		
 		while ((probe.column() != border) && !(probe.isOccupied() )) {
 			probe = board().square(probe.row(), probe.column()+increment);
-//			System.out.println(probe);
 		}
-//		System.out.println("c");
+		
 		if (!game().movedPieces().contains(probe.piece()) && probe.piece() instanceof Rook) {
 			moves.add(board().square(probe.row(), this.column()+2*increment));
 		}
-		
-		// need to add checking by the enemyKing could get messy!
-		
-//		while ((probe.column() <= border+2*increment) &&//
-//				!(probe.isOccupied() || probe.isChecked(this, pieces))) {
-//			
-//			probe = board().square(probe.row(), probe.column()+increment);
-//		}
-//		
-//		while ((probe.column() != border) && !(probe.isOccupied() )) {
-//			probe = board().square(probe.row(), probe.column()+increment);
-//		}
-//		
-//		if (probe.isOccupied() && !game().movedPieces().contains(probe.piece()) //
-//							   && probe.piece() instanceof Rook) {
-//			
-//			moves.add(board().square(probe.row(), this.column()+2*increment));
-//		}
 	}
 	
 	public boolean isChecked(ArrayList<Piece> pieces){
@@ -135,36 +115,30 @@ public class King extends Piece{
 	}
 	
 	public boolean isMated(ArrayList<Piece> pieces){
-
-		// !piece.equals(this) in combination with the later for loop finally takes care of not
-		// causing an infinite loop when using the copy of pieces in castling. Is this simpler?
-		// or is the prior method preferred?
-		//System.out.println("entered mate");
-		//int i =0;
+		// This I need to think about!  If king is checked by rook then the square behind the
+		// king is not!  Will canMove return true since the square is not checked? Nope since
+		// canMove uses super.legalMoves which actually moves the piece and makes sure that the
+		// move does not result in a check!
+		// but that means that the system below is not correct, checking the king specially if 
+		// his moves are checked since moves() does not move the king to the actual square.
+		// Now it should be correct.
+		System.out.println("Player "+this.player()+" is checked for mate.");
 		for (int i=0;i<pieces.size();i++){
 //		for (Piece piece : pieces){  // this caused an exception with the iterator, no idea why.
-//			System.out.println(pieces);
-//			System.out.println(pieces.get(i));
-//			if (piece.inTeamOf(this) && piece.canMove(pieces)){
-//				System.out.println("could move");
-//				return false;
-//			}
 			Piece piece = pieces.get(i);
-//			if (!pieces.get(i).equals(this) && pieces.get(i).inTeamOf(this) && pieces.get(i).canMove(pieces)){
-			if (!piece.equals(this) && piece.inTeamOf(this) && piece.canMove(pieces)){
-//				System.out.println("could move");
+
+//			if (!piece.equals(this) && piece.inTeamOf(this) && piece.canMove(pieces)){
+			if (piece.inTeamOf(this) && piece.canMove(pieces)){
+				System.out.println(piece.symbol);
+				System.out.println(piece.legalMoves(pieces));
+				System.out.println(piece.canMove(pieces));
 				return false;
 			}
-			
-			
-
-//			System.out.println(pieces);
 		}
-		for (Square move : this.moves(pieces)) {
-			if (!move.isChecked(this, pieces))
-				return false;
-		}
-//		System.out.println(pieces);
+//		for (Square move : this.moves(pieces)) {
+//			if (!move.isChecked(this, pieces))
+//				return false;
+//		}
 		return true;
 	}
 	

@@ -4,10 +4,12 @@ import java.util.ArrayList;
 
 public class Knight extends Piece{
 	
-	public Knight(int player, ChessGame game, Board board, Square square) {
-		super(player, game, board, square);
+	public Knight(int player, ChessGame game, Square square) {
+		super(player, game, square);
 		symbol = colors[player] + "k";
 	}
+
+	public int imageIndex() { return 4 + player(); }
 	
 	@Override
 	public ArrayList<Square> moves(ArrayList<Piece> pieces){

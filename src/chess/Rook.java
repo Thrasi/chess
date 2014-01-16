@@ -4,10 +4,12 @@ import java.util.ArrayList;
 
 public class Rook extends Piece{
 	
-	public Rook(int player, ChessGame game, Board board, Square square) {
-		super(player, game, board, square);
+	public Rook(int player, ChessGame game, Square square) {
+		super(player, game, square);
 		symbol = colors[player] + "R";
 	}
+	
+	public int imageIndex() { return 2 + player(); }
 	
 	@Override
 	public ArrayList<Square> moves(ArrayList<Piece> pieces){

@@ -9,17 +9,21 @@ public abstract class Piece {
 	// for display in terminal
 	protected String symbol;
 	protected static String[] colors = {"w","b"};
-	//
 	
-	public Piece(int player, ChessGame game, Board board, Square square) {
+	
+	
+	public Piece(int player, ChessGame game, Square square) {
 		this.player = player;
 		this.game = game;
 		this.square = square;
 		this.square.placePiece(this);
-		this.board = board;
+		this.board = game.board();
 	}
 	
 	public abstract ArrayList<Square> moves(ArrayList<Piece> pieces);
+	
+	// for graphical display
+	public abstract int imageIndex();
 	
 	public ArrayList<Square> killMoves(ArrayList<Piece> pieces) {
 		return moves(pieces);
@@ -96,13 +100,7 @@ public abstract class Piece {
 	
 	public boolean canMoveTo(Square square, ArrayList<Piece> pieces) { return legalMoves(pieces).contains(square); }
 	
-	public boolean canMove(ArrayList<Piece> pieces) {
-//		System.out.println("can move");
-		boolean baba = !legalMoves(pieces).isEmpty(); 
-//		System.out.println(baba);
-//		System.out.println("can move");
-		return baba; 
-	}
+	public boolean canMove(ArrayList<Piece> pieces) { return !legalMoves(pieces).isEmpty(); }
 	public boolean inTeamOf(Piece piece) { return (this.player == piece.player); }
 	public boolean isEnemyOf(Piece piece) { return !inTeamOf(piece); }
 	

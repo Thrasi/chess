@@ -1,11 +1,10 @@
 package chess;
-import java.util.ArrayList;
 
 
 public class Board {
 	
 	private Square[][] board;
-	private ChessGame game;
+	private ChessGame game;   // is this even needed?
 	
 	public Board(int size, ChessGame game){
 		board = new Square[size][size];
