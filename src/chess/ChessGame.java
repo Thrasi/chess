@@ -10,26 +10,10 @@ public abstract class ChessGame {
 	private ArrayList<Piece> movedPieces = new ArrayList<Piece>();
 	private int player = 0;
 	private Square enPassantSquare;
-	private Piece promotionPiece;
+
 	
 	public ChessGame(){
 		board = new Board(8,this);
-		//This one causes an exception with the by moving the black
-		// queen to 1,4. Why? Seems like an altered iterator but I have
-		// not found it. This does not happen if I move some other piece first
-		//
-//		int player = 0;
-//		pieces.add(new Rook(player,this,board,board.square(7, 0)));
-//		kings[player] = new King(player,this,board,board.square(7, 4));
-//		pieces.add(kings[player]);
-//		player = 1;
-//		pieces.add(new Rook(player,this,board,board.square(0, 0)));
-//		pieces.add(new Queen(player,this,board,board.square(0, 3)));
-//		kings[player] = new King(player,this,board,board.square(0, 4));
-//		pieces.add(kings[player]);
-//		for (Piece piece : pieces) {
-//			movedPieces.add(piece);
-//		}
 		
 		// normal starting position
 		
@@ -105,15 +89,11 @@ public abstract class ChessGame {
 		return this.player;
 	}
 	
-	
 	// split this into two method or change the name...  stalemate is not a loss.
 	// TODO: implement the threefold repetition draw and other possibilities
 	private void hasLost(int player) throws MateException, StaleMateException {
 		if (kings[player].isChecked(pieces)) {
-			System.out.println("CHECK!");
-			
 			if (kings[player].isMated(pieces)) {
-				System.out.println("MATE!");
 				throw new MateException();
 			}
 		}
@@ -150,20 +130,34 @@ public abstract class ChessGame {
 		}
 	}
 	
-	// this process can probably be made safer, at least more elegant.
 	private Piece promotePawn(Pawn pawn) {
+		Square square = pawn.square();
+		Piece promotedPiece = null;
 		pieces.remove(pawn);
-		promotePawnInterface(pawn);
-		pieces.add(this.promotionPiece);
-		return this.promotionPiece;
+		
+		int typeOfPiece = promotePawnInterface();
+		
+		switch (typeOfPiece) {
+		case 0:
+			promotedPiece = new Rook(player, this, square); break;
+		case 1:
+			promotedPiece = new Knight(player, this, square); break;
+		case 2:
+			promotedPiece = new Bishop(player, this, square); break;
+		case 3:
+		default:
+			promotedPiece = new Queen(player, this, square); break;
+		}
+		
+		pieces.add(promotedPiece);
+		
+		return promotedPiece;
 	}
 	
-	public void setPromotionPiece(Piece piece) {
-		this.promotionPiece = piece;
+	// choose a queen as default.  Should be overridden by the user interface.
+	public int promotePawnInterface() {
+		return 3; 
 	}
-	
-	public abstract void promotePawnInterface(Piece pawn);
-	
 	
 	// move to board?
 	public void move(Piece movingPiece, Square destination) {

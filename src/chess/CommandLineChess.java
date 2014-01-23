@@ -6,27 +6,24 @@ import java.util.Scanner;
 public class CommandLineChess extends ChessGame{
 	
 	@Override
-	public void promotePawnInterface(Piece piece) {
+	public int promotePawnInterface() {
 		// default: just choose a queen
 		String input = readString("Please choose [r]ook/[k]night/[b]ishop/[q]ueen: ",false).toLowerCase();
-		Piece promotedPiece = null;
-		while (promotedPiece == null) {
+		while (true) {
 			char typeOfPiece = input.charAt(0);
 			switch (typeOfPiece) {
 				case 'r':
-					promotedPiece = new Rook(piece.player(), piece.game(), piece.square()); break;
+					return 0;
 				case 'k':
-					promotedPiece = new Knight(piece.player(), piece.game(), piece.square()); break;
+					return 1;
 				case 'b':
-					promotedPiece = new Bishop(piece.player(), piece.game(), piece.square()); break;
+					return 2;
 				case 'q':
-					promotedPiece = new Queen(piece.player(), piece.game(), piece.square()); break;
+					return 3;
 				default:
 					input = readString("Enter r, k, b or q: ",false);
 			}
 		}
-		piece.game().setPromotionPiece(promotedPiece);
-		//return promotedPiece;
 	}
 
 	public static void main(String[] args) {
