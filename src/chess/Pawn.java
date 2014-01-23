@@ -25,10 +25,6 @@ public class Pawn extends Piece{
 
 	@Override
 	public ArrayList<Square> moves(ArrayList<Piece> pieces){
-		/*
-		 * TODO: en passat! needs to keep track of which piece was moved last
-		 * and it should be implemented after the gameplay has been implemented
-		 */
 		
 		ArrayList<Square> moves = new ArrayList<Square>();
 		Square square;

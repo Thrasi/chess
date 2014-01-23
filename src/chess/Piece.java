@@ -10,8 +10,6 @@ public abstract class Piece {
 	protected String symbol;
 	protected static String[] colors = {"w","b"};
 	
-	
-	
 	public Piece(int player, ChessGame game, Square square) {
 		this.player = player;
 		this.game = game;
@@ -28,31 +26,15 @@ public abstract class Piece {
 	public ArrayList<Square> killMoves(ArrayList<Piece> pieces) {
 		return moves(pieces);
 	}
-		
-//	public ArrayList<Square> killMoves(ArrayList<Piece> pieces) {
-//		ArrayList<Square> killMoves = new ArrayList<Square>();
-//		for (Square destination : moves(pieces)) {
-//			if (square.isOccupied()) {
-//				killMoves.add(destination);
-//			}
-//		}
-//		return killMoves;
-//	}
 	
 	public ArrayList<Square> legalMoves(ArrayList<Piece> pieces) { // maybe this should belong to game
 		ArrayList<Square> legalMoves = new ArrayList<Square>();
-//		System.out.println(moves(pieces));
 		for (Square destination : moves(pieces)) {
 			
 			Square origin = this.square();
 			Piece victim = destination.piece();
 			
 			move(this,destination);
-//			
-//			pieces.remove(victim);
-//			origin.clear();
-//			this.assignSquare(destination);
-//			destination.placePiece(this);
 			
 			if ( !king().isChecked(pieces)) {
 				legalMoves.add(square);
@@ -60,18 +42,12 @@ public abstract class Piece {
 			
 			// reset the pieces
 			move(this,origin);
-			// victim = blablabla
-//			pieces.remove(victim);
-//			destination.clear();
-//			this.assignSquare(origin);
-//			origin.placePiece(this);
 			
 			if (victim != null) {
 				destination.placePiece(victim);
 				pieces.add(victim);
 			}
 		}
-//		System.out.println(legalMoves);
 		return legalMoves;
 	}
 	

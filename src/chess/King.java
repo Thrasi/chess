@@ -122,12 +122,10 @@ public class King extends Piece{
 		// but that means that the system below is not correct, checking the king specially if 
 		// his moves are checked since moves() does not move the king to the actual square.
 		// Now it should be correct.
-		System.out.println("Player "+this.player()+" is checked for mate.");
 		for (int i=0;i<pieces.size();i++){
-//		for (Piece piece : pieces){  // this caused an exception with the iterator, no idea why.
+//		for (Piece piece : pieces){  // this caused an exception with the iterator, think about it.
 			Piece piece = pieces.get(i);
 
-//			if (!piece.equals(this) && piece.inTeamOf(this) && piece.canMove(pieces)){
 			if (piece.inTeamOf(this) && piece.canMove(pieces)){
 				System.out.println(piece.symbol);
 				System.out.println(piece.legalMoves(pieces));
@@ -135,10 +133,6 @@ public class King extends Piece{
 				return false;
 			}
 		}
-//		for (Square move : this.moves(pieces)) {
-//			if (!move.isChecked(this, pieces))
-//				return false;
-//		}
 		return true;
 	}
 	
