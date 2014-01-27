@@ -9,6 +9,7 @@ public class Pawn extends Piece{
 		super(player, game, square);
 		movingDirection = (player == 0) ? -1 : 1;
 		symbol = colors[player] + "P";
+		AIVALUE = 1 * Math.pow(-1, player);
 	}
 	
 	public int imageIndex() { return 0 + player(); }

@@ -7,6 +7,7 @@ public class Queen extends Piece{
 	public Queen(int player, ChessGame game, Square square) {
 		super(player, game, square);
 		symbol = colors[player] + "Q";
+		AIVALUE = 8.8 * Math.pow(-1, player);
 	}
 	
 	public int imageIndex() { return 8 + player(); }

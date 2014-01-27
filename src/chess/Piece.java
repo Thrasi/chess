@@ -9,6 +9,7 @@ public abstract class Piece {
 	// for display in terminal
 	protected String symbol;
 	protected static String[] colors = {"w","b"};
+	protected double AIVALUE;
 	
 	public Piece(int player, ChessGame game, Square square) {
 		this.player = player;

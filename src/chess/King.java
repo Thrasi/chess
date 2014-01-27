@@ -3,19 +3,14 @@ import java.util.ArrayList;
 
 
 public class King extends Piece{
-	boolean hasMoved;
 	
 	public King(int player, ChessGame game, Square square){
 		super(player, game, square);
 		symbol = colors[player] + "K";
-		hasMoved = false;
+		AIVALUE = 100 * Math.pow(-1, player);
 	}
 	
 	public int imageIndex() { return 10 + player(); }
-	
-	public boolean hasMoved() {
-		return hasMoved;
-	}
 	
 	// To get passed an infinite loop caused by isMated and castling.  Don't forget the '!'!
 	@Override   

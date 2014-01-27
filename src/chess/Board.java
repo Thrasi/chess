@@ -6,11 +6,11 @@ public class Board {
 	private Square[][] board;
 	private ChessGame game;   // is this even needed?
 	
-	public Board(int size, ChessGame game){
+	public Board(int size, ChessGame game) {
 		board = new Square[size][size];
 		this.game = game;
-		for (int row=0;row<size;row++){
-			for (int column=0;column<size;column++){
+		for (int row=0;row<size;row++) {
+			for (int column=0;column<size;column++) {
 				board[row][column] = new Square(row,column);
 			}
 		}
@@ -20,8 +20,8 @@ public class Board {
 	
 	public String toString(){
 		String line="0", boardString ="\n  0  1  2  3  4  5  6  7\n";
-		for (int row=0;row<8;row++){
-			for (Square square : board[row]){
+		for (int row=0;row<8;row++) {
+			for (Square square : board[row]) {
 				line += square.display();
 			}
 			boardString += line+"|\n";
@@ -29,5 +29,36 @@ public class Board {
 		}
 		return boardString;
 	}
+	
+	public double value() {
+		double value = 0;
+		for (Piece piece : game.pieces()) {
+			value += piece.AIVALUE;
+		}
+//		for (int row=0;row<board.length;row++) {
+//			for (int column=0;column<board.length;column++) {
+//				if (board[row][column].isOccupied()) {
+//					System.out.println(board[row][column].piece().AIVALUE);
+//					value += board[row][column].piece().AIVALUE;
+//					
+//				}
+//				
+//			}
+//		}
+		return value;
+	}
+	
 
 }
+
+
+
+
+
+
+
+
+
+
+
+

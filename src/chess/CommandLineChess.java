@@ -38,6 +38,7 @@ public class CommandLineChess extends ChessGame{
 			while(playCount<plays){
 				playCount++;
 				System.out.println(game.board());
+				System.out.println("Board value: "+game.board().value());
 //				player = game.randomMove();
 				
 				System.out.printf("%s, choose a piece to move.\n",(game.player() == 0) ? "White" : "black");

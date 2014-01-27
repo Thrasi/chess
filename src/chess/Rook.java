@@ -2,17 +2,18 @@ package chess;
 
 import java.util.ArrayList;
 
-public class Rook extends Piece{
+public class Rook extends Piece {
 	
 	public Rook(int player, ChessGame game, Square square) {
 		super(player, game, square);
 		symbol = colors[player] + "R";
+		AIVALUE = 5.1 * Math.pow(-1, player);
 	}
 	
 	public int imageIndex() { return 2 + player(); }
 	
 	@Override
-	public ArrayList<Square> moves(ArrayList<Piece> pieces){
+	public ArrayList<Square> moves(ArrayList<Piece> pieces) {
 	//	System.out.println("moves");
 		ArrayList<Square> moves = new ArrayList<Square>();
 		Square square;
