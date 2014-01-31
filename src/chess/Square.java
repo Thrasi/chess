@@ -37,7 +37,7 @@ public class Square {
 	
 	public boolean isChecked(Piece team, ArrayList<Piece> pieces){
 		for (Piece piece : pieces){
-			if (piece.isEnemyOf(team) && piece.checks(this, pieces)){
+			if (piece.isEnemyOf(team) && piece.checks(this)){
 				return true;
 			}
 		}

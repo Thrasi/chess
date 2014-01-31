@@ -15,9 +15,9 @@ public class Pawn extends Piece{
 	public int imageIndex() { return 0 + player(); }
 	
 	@Override 
-	public ArrayList<Square> killMoves(ArrayList<Piece> pieces) {
+	public ArrayList<Square> killMoves() {
 		ArrayList<Square> killMoves = new ArrayList<Square>();
-		for (Square destination : moves(pieces)) {
+		for (Square destination : moves()) {
 			if (destination.column() != this.column())
 				killMoves.add(destination);
 		}
@@ -25,7 +25,7 @@ public class Pawn extends Piece{
 	}
 
 	@Override
-	public ArrayList<Square> moves(ArrayList<Piece> pieces){
+	public ArrayList<Square> moves(){
 		
 		ArrayList<Square> moves = new ArrayList<Square>();
 		Square square;

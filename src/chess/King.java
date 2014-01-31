@@ -14,13 +14,12 @@ public class King extends Piece{
 	
 	// To get passed an infinite loop caused by isMated and castling.  Don't forget the '!'!
 	@Override   
-	public boolean canMove(ArrayList<Piece> pieces) {
-		System.out.println(super.legalMoves(pieces));
-		return !super.legalMoves(pieces).isEmpty();
+	public boolean canMove() {
+		return !super.legalMoves().isEmpty();
 	}
 	
 	@Override
-	public ArrayList<Square> moves(ArrayList<Piece> pieces){
+	public ArrayList<Square> moves(){
 		ArrayList<Square> moves = new ArrayList<Square>();
 		int row = this.row();
 		int column = this.column();
@@ -52,10 +51,10 @@ public class King extends Piece{
 	
 	@Override
 	// When castling was added in moves it caused problems of infinite looping. Solved.
-	public ArrayList<Square> legalMoves(ArrayList<Piece> pieces){
+	public ArrayList<Square> legalMoves(){
 		
 		ArrayList<Square> legalMoves = new ArrayList<Square>();
-		legalMoves = super.legalMoves(pieces);
+		legalMoves = super.legalMoves();
 		if (!game().movedPieces().contains(this)) {
 			addCastling(0,-1,legalMoves);
 			addCastling(7,1,legalMoves);
@@ -78,17 +77,17 @@ public class King extends Piece{
 	// This is solved, read other comments.
 	private void addCastling(int border, int increment, ArrayList<Square> moves) {
 		Square probe = board().square(this.row(), this.column());
-		ArrayList<Piece> pieces = new ArrayList<Piece>();
-		
-		for (Piece piece : game().pieces()) {
-			pieces.add(piece);
-		}
+//		ArrayList<Piece> pieces = new ArrayList<Piece>();
+//		
+//		for (Piece piece : game().pieces()) {
+//			pieces.add(piece);
+//		}
 
-		if (probe.isChecked(this, pieces)) { return; }
+		if (probe.isChecked(this, enemies())) { return; }
 		
 		for (int i=1;i<=2;i++) {
 			probe = board().square(probe.row(), probe.column()+increment);
-			if (probe.isOccupied() || probe.isChecked(this, pieces)) { return; }
+			if (probe.isOccupied() || probe.isChecked(this, enemies())) { return; }
 		}
 		
 		while ((probe.column() != border) && !(probe.isOccupied() )) {
@@ -100,16 +99,16 @@ public class King extends Piece{
 		}
 	}
 	
-	public boolean isChecked(ArrayList<Piece> pieces){
-		for (Piece piece : pieces){
-			if (piece.isEnemyOf(this) && piece.checks(this, pieces)){
+	public boolean isChecked(){
+		for (Piece enemy : enemies()){
+			if (enemy.checks(this)){
 				return true;
 			}
 		}
 		return false;
 	}
 	
-	public boolean isMated(ArrayList<Piece> pieces){
+	public boolean isMated(){
 		// This I need to think about!  If king is checked by rook then the square behind the
 		// king is not!  Will canMove return true since the square is not checked? Nope since
 		// canMove uses super.legalMoves which actually moves the piece and makes sure that the
@@ -117,14 +116,11 @@ public class King extends Piece{
 		// but that means that the system below is not correct, checking the king specially if 
 		// his moves are checked since moves() does not move the king to the actual square.
 		// Now it should be correct.
-		for (int i=0;i<pieces.size();i++){
+		for (int i=0;i<teamMates().size();i++){
 //		for (Piece piece : pieces){  // this caused an exception with the iterator, think about it.
-			Piece piece = pieces.get(i);
+			Piece piece = teamMates().get(i);
 
-			if (piece.inTeamOf(this) && piece.canMove(pieces)){
-				System.out.println(piece.symbol);
-				System.out.println(piece.legalMoves(pieces));
-				System.out.println(piece.canMove(pieces));
+			if (piece.inTeamOf(this) && piece.canMove()){
 				return false;
 			}
 		}

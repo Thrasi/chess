@@ -13,7 +13,7 @@ public class Queen extends Piece{
 	public int imageIndex() { return 8 + player(); }
 	
 	@Override
-	public ArrayList<Square> moves(ArrayList<Piece> pieces){
+	public ArrayList<Square> moves(){
 		ArrayList<Square> moves = new ArrayList<Square>();
 		Square square;
 		int row = this.row();

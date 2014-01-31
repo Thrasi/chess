@@ -13,8 +13,7 @@ public class Rook extends Piece {
 	public int imageIndex() { return 2 + player(); }
 	
 	@Override
-	public ArrayList<Square> moves(ArrayList<Piece> pieces) {
-	//	System.out.println("moves");
+	public ArrayList<Square> moves() {
 		ArrayList<Square> moves = new ArrayList<Square>();
 		Square square;
 		int row = this.row();

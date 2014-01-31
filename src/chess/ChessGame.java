@@ -10,53 +10,72 @@ public abstract class ChessGame {
 	private ArrayList<Piece> movedPieces = new ArrayList<Piece>();
 	private int player = 0;
 	private Square enPassantSquare;
-
+	private Player currentPlayer;
+	protected Player[] players = new Player[2];
 	
 	public ChessGame(){
 		board = new Board(8,this);
+		players[0] = new HumanPlayer(this);
+		players[1] = new AIPlayer(this);
+		currentPlayer = players[0];
 		
 		// normal starting position
 		
 		int player = 0;
 		pieces.add(new Rook(player,this,board.square(7, 0)));
+		players[player].add(pieces.get(pieces.size()-1));
 		pieces.add(new Knight(player,this,board.square(7, 1)));
+		players[player].add(pieces.get(pieces.size()-1));
 		pieces.add(new Bishop(player,this,board.square(7, 2)));
+		players[player].add(pieces.get(pieces.size()-1));
 		pieces.add(new Queen(player,this,board.square(7, 3)));
+		players[player].add(pieces.get(pieces.size()-1));
 		kings[player] = new King(player,this,board.square(7, 4));
 		pieces.add(kings[player]);	// its important to add the king to pieces
+		players[player].add(pieces.get(pieces.size()-1));
 		pieces.add(new Bishop(player,this,board.square(7, 5)));
+		players[player].add(pieces.get(pieces.size()-1));
 		pieces.add(new Knight(player,this,board.square(7, 6)));
+		players[player].add(pieces.get(pieces.size()-1));
 		pieces.add(new Rook(player,this,board.square(7, 7)));
+		players[player].add(pieces.get(pieces.size()-1));
 		
 		for (int i=0;i<8;i++){
 			pieces.add(new Pawn(player,this,board.square(6, i)));
+			players[player].add(pieces.get(pieces.size()-1));
 		}
 		
 		player = 1;
 		pieces.add(new Rook(player,this,board.square(0, 0)));
+		players[player].add(pieces.get(pieces.size()-1));
 		pieces.add(new Knight(player,this,board.square(0, 1)));
+		players[player].add(pieces.get(pieces.size()-1));
 		pieces.add(new Bishop(player,this,board.square(0, 2)));
+		players[player].add(pieces.get(pieces.size()-1));
 		pieces.add(new Queen(player,this,board.square(0, 3)));
+		players[player].add(pieces.get(pieces.size()-1));
 		kings[player] = new King(player,this,board.square(0, 4));
 		pieces.add(kings[player]);  // its important to add the king to pieces
+		players[player].add(pieces.get(pieces.size()-1));
 		pieces.add(new Bishop(player,this,board.square(0, 5)));
+		players[player].add(pieces.get(pieces.size()-1));
 		pieces.add(new Knight(player,this,board.square(0, 6)));
+		players[player].add(pieces.get(pieces.size()-1));
 		pieces.add(new Rook(player,this,board.square(0, 7)));
+		players[player].add(pieces.get(pieces.size()-1));
 		
 		for (int i=0;i<8;i++) {
 			pieces.add(new Pawn(player,this,board.square(1, i)));
+			players[player].add(pieces.get(pieces.size()-1));
 		}
 	}
 	
-	public int play(int row1, int column1, int row2, int column2) throws MateException, StaleMateException {
-		Piece movingPiece = board().square(row1, column1).piece();
-		Square destination = board().square(row2, column2);
-		if (movingPiece == null) {
-			return this.player;
-		}
+	public int play(Piece movingPiece, Square destination) throws MateException, StaleMateException {
+		int row1 = movingPiece.row(), column1 = movingPiece.column();
+		int column2 = destination.column();
 
 		if (this.player == movingPiece.player()) {
-			if (movingPiece.canMoveTo(destination, pieces)) {
+			if (movingPiece.canMoveTo(destination)) {
 				// en passant and promotion:
 				if (movingPiece instanceof Pawn) {
 					enPassant(movingPiece, destination);
@@ -80,10 +99,12 @@ public abstract class ChessGame {
 						movedPieces.add(movingPiece);
 					}
 				}
-				// change players
-				changePlayer();
+				// change players, maybe this allowes the AI to perform a move while this method call is still 
+				// within hasLost() and causes a concurrentmodification exception.
+				
 				// check if game is ended
-				hasLost(this.player);
+				hasLost((this.player+1)%2);
+				changePlayer();
 			}
 		}
 		return this.player;
@@ -92,16 +113,17 @@ public abstract class ChessGame {
 	// split this into two method or change the name...  stalemate is not a loss.
 	// TODO: implement the threefold repetition draw and other possibilities
 	private void hasLost(int player) throws MateException, StaleMateException {
-		if (kings[player].isChecked(pieces)) {
-			if (kings[player].isMated(pieces)) {
+		ArrayList<Piece> teamMates = players[player].pieces();
+		if (kings[player].isChecked()) {
+			if (kings[player].isMated()) {
 				throw new MateException();
 			}
 		}
 		else {
 			boolean staleMate = true;
 			
-			for (Piece piece : pieces) {
-				if (piece.inTeamOf(kings[player]) && !piece.legalMoves(pieces).isEmpty()) {
+			for (Piece piece : teamMates) {
+				if (piece.inTeamOf(kings[player]) && !piece.legalMoves().isEmpty()) {
 					staleMate = false;
 					break;
 				}
@@ -162,6 +184,9 @@ public abstract class ChessGame {
 	// move to board?
 	public void move(Piece movingPiece, Square destination) {
 		Piece victim = destination.piece();
+		if (victim != null) {
+			victim.teamMates().remove(victim);
+		}
 		pieces.remove(victim);
 		movingPiece.square().clear();
 		movingPiece.assignSquare(destination);
@@ -178,7 +203,12 @@ public abstract class ChessGame {
 	
 	public ArrayList<Piece> movedPieces() { return movedPieces; }
 	
-	private void changePlayer() { this.player = (this.player+1)%2; }
+	public void changePlayer() { 
+//		System.out.println("Player: " + player + ":  " + currentPlayer);
+		this.player = (this.player+1)%2;
+		this.currentPlayer = (this.currentPlayer.equals(players[0])) ? players[1] : players[0];
+//		System.out.println("Player: " + player + ":  " + currentPlayer);
+		}
 	
 	public int player() { return player; }
 	
@@ -190,11 +220,19 @@ public abstract class ChessGame {
 			int pieceNr = generator.nextInt(pieces.size());
 			Piece piece = pieces.get(pieceNr);
 			
-			if (!piece.legalMoves(pieces).isEmpty()) {	
-				int moveNr = generator.nextInt(piece.legalMoves(pieces).size());
-				Square move = piece.legalMoves(pieces).get(moveNr);
-				play(piece.row(),piece.column(),move.row(),move.column());
+			ArrayList<Square> possibleMoves = piece.legalMoves();
+			if (!possibleMoves.isEmpty()) {	
+				int moveNr = generator.nextInt(possibleMoves.size());
+				Square move = possibleMoves.get(moveNr);
+				play(piece, move);
+//				play(piece.row(),piece.column(),move.row(),move.column());
 			}
 		}
 	}
+	
+	public void start() {
+		
+	}
+	
+	public Player currentPlayer() { return currentPlayer; }
 }

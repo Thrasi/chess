@@ -13,7 +13,7 @@ public class Knight extends Piece {
 	public int imageIndex() { return 4 + player(); }
 	
 	@Override
-	public ArrayList<Square> moves(ArrayList<Piece> pieces) {
+	public ArrayList<Square> moves() {
 		ArrayList<Square> moves = new ArrayList<Square>();
 		Square square;
 		int row = this.row();
