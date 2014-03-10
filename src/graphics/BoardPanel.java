@@ -91,7 +91,7 @@ public class BoardPanel extends JPanel {
 				} finally {
 					repaint();
 					movingPiece = null;
-					System.out.println(board);
+//					System.out.println(board);
 				}
 			}
 		}

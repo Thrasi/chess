@@ -32,7 +32,13 @@ public class Board {
 	
 	public double value() {
 		double value = 0;
-		for (Piece piece : game.pieces()) {
+//		for (Piece piece : game.pieces()) {
+//			value += piece.AIVALUE;
+//		}
+		for (Piece piece : game.players[0].pieces()) {
+			value += piece.AIVALUE;
+		}
+		for (Piece piece : game.players[1].pieces()) {
 			value += piece.AIVALUE;
 		}
 //		for (int row=0;row<board.length;row++) {

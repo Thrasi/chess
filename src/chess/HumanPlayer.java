@@ -2,8 +2,8 @@ package chess;
 
 public class HumanPlayer extends Player {
 
-	public HumanPlayer(ChessGame game) {
-		super(game);
+	public HumanPlayer(ChessGame game, int colour) {
+		super(game, colour);
 	}
 
 	@Override

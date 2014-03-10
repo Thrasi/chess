@@ -12,8 +12,8 @@ public abstract class Piece {
 	protected static String[] colors = {"w","b"};
 	protected double AIVALUE;
 	
-	public Piece(int player, ChessGame game, Square square) {
-		this.player = player;
+	public Piece(int colour, ChessGame game, Square square) {
+		this.player = colour;
 		this.owner = game.players[player];
 		this.game = game;
 		this.square = square;
@@ -38,14 +38,14 @@ public abstract class Piece {
 			Square origin = this.square();
 			Piece victim = destination.piece();
 			
-			move(this,destination);
+			move(this, destination);
 			
 			if ( !king().isChecked()) {
 				legalMoves.add(square);
 			}
 			
 			// reset the pieces
-			move(this,origin);
+			move(this, origin);
 			
 			if (victim != null) {
 				destination.placePiece(victim);
@@ -61,10 +61,11 @@ public abstract class Piece {
 	
 	public boolean checks(King king) {
 		return checks(king.square());
-		}
+	}
+	
 	public boolean checks(Square square) { 
 		return killMoves().contains(square); 
-		}
+	}
 	
 	// Try to add square to moves and report whether we should add a new one. 
 	public boolean addToMoves(Square square, ArrayList<Square> moves) {

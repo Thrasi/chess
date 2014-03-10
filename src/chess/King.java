@@ -77,17 +77,12 @@ public class King extends Piece{
 	// This is solved, read other comments.
 	private void addCastling(int border, int increment, ArrayList<Square> moves) {
 		Square probe = board().square(this.row(), this.column());
-//		ArrayList<Piece> pieces = new ArrayList<Piece>();
-//		
-//		for (Piece piece : game().pieces()) {
-//			pieces.add(piece);
-//		}
 
-		if (probe.isChecked(this, enemies())) { return; }
+		if (probe.isChecked(enemies())) { return; }
 		
 		for (int i=1;i<=2;i++) {
 			probe = board().square(probe.row(), probe.column()+increment);
-			if (probe.isOccupied() || probe.isChecked(this, enemies())) { return; }
+			if (probe.isOccupied() || probe.isChecked(enemies())) { return; }
 		}
 		
 		while ((probe.column() != border) && !(probe.isOccupied() )) {
@@ -109,18 +104,10 @@ public class King extends Piece{
 	}
 	
 	public boolean isMated(){
-		// This I need to think about!  If king is checked by rook then the square behind the
-		// king is not!  Will canMove return true since the square is not checked? Nope since
-		// canMove uses super.legalMoves which actually moves the piece and makes sure that the
-		// move does not result in a check!
-		// but that means that the system below is not correct, checking the king specially if 
-		// his moves are checked since moves() does not move the king to the actual square.
-		// Now it should be correct.
 		for (int i=0;i<teamMates().size();i++){
 //		for (Piece piece : pieces){  // this caused an exception with the iterator, think about it.
 			Piece piece = teamMates().get(i);
-
-			if (piece.inTeamOf(this) && piece.canMove()){
+			if (piece.canMove()){
 				return false;
 			}
 		}

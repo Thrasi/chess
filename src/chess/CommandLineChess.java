@@ -47,8 +47,9 @@ public class CommandLineChess extends ChessGame{
 				System.out.println("Choose a destination for the piece.");
 				r2 = readInt("row: ", 0, 7);
 				c2 = readInt("column: ", 0, 7);
-				
-				game.play(r1, c1, r2, c2);
+				Piece movingPiece = game.board().square(r1, c1).piece();
+				Square destination = game.board().square(r2, c2);
+				game.play(movingPiece, destination);
 			}
 		}
 		catch (MateException e) {

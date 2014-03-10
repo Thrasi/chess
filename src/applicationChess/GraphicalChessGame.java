@@ -36,8 +36,8 @@ public class GraphicalChessGame extends ChessGame{
 	
 	@Override
 	public void start() {
-		while (true) {
-//			System.out.println(currentPlayer());
+		// this makes the AI stop!
+		while(gameOn) {  
 			this.currentPlayer().play();
 		}
 	}

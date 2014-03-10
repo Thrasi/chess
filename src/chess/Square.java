@@ -19,7 +19,9 @@ public class Square {
 	public boolean isOccupied() { return this.piece != null; }
 	public void placePiece(Piece piece) { this.piece = piece; }
 	
-	public boolean equals(Square square) {
+	@Override
+	public boolean equals(Object o) {
+		Square square = (Square)o;
 		if (square == null)
 			return false;
 		
@@ -35,9 +37,9 @@ public class Square {
 		}
 	}
 	
-	public boolean isChecked(Piece team, ArrayList<Piece> pieces){
-		for (Piece piece : pieces){
-			if (piece.isEnemyOf(team) && piece.checks(this)){
+	public boolean isChecked(ArrayList<Piece> enemies){
+		for (Piece enemy : enemies){
+			if (enemy.checks(this)){
 				return true;
 			}
 		}

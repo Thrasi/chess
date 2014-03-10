@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public abstract class ChessGame {
 	private Board board;
@@ -10,13 +11,17 @@ public abstract class ChessGame {
 	private ArrayList<Piece> movedPieces = new ArrayList<Piece>();
 	private int player = 0;
 	private Square enPassantSquare;
-	private Player currentPlayer;
+	private Player currentPlayer, blackPlayer, whitePlayer;
 	protected Player[] players = new Player[2];
+	protected boolean gameOn = true;
+	public static final int WHITE = 0, BLACK = 1;
 	
 	public ChessGame(){
 		board = new Board(8,this);
-		players[0] = new HumanPlayer(this);
-		players[1] = new AIPlayer(this);
+		players[0] = new HumanPlayer(this,WHITE);
+		whitePlayer = players[WHITE];
+		players[1] = new AIPlayer(this,BLACK);
+		blackPlayer = players[BLACK];
 		currentPlayer = players[0];
 		
 		// normal starting position
@@ -113,24 +118,65 @@ public abstract class ChessGame {
 	// split this into two method or change the name...  stalemate is not a loss.
 	// TODO: implement the threefold repetition draw and other possibilities
 	private void hasLost(int player) throws MateException, StaleMateException {
-		ArrayList<Piece> teamMates = players[player].pieces();
-		if (kings[player].isChecked()) {
-			if (kings[player].isMated()) {
-				throw new MateException();
-			}
+//		ArrayList<Piece> teamMates = players[player].pieces();
+//		if (kings[player].isChecked()) {
+//			if (kings[player].isMated()) {
+//				gameOn = false;
+//				System.out.println("Mate, game on: "+gameOn);
+//				throw new MateException();
+//			}
+//		}
+//		else {
+//			boolean staleMate = true;
+//			
+//			for (Piece piece : teamMates) {
+//				if (piece.inTeamOf(kings[player]) && !piece.legalMoves().isEmpty()) {
+//					staleMate = false;
+//					break;
+//				}
+//			}
+//			if (staleMate) {
+//				gameOn = false;
+//				System.out.println("Stale mate, game on: "+gameOn);
+//				throw new StaleMateException();
+//			}
+//		}
+		Player p = opponent();
+		if (p.isMated()) {
+			gameOn = false;
+			System.out.println("Mate, game on: "+gameOn);
+			throw new MateException();
 		}
 		else {
-			boolean staleMate = true;
-			
-			for (Piece piece : teamMates) {
-				if (piece.inTeamOf(kings[player]) && !piece.legalMoves().isEmpty()) {
-					staleMate = false;
-					break;
-				}
-			}
-			if (staleMate)
+			if (staleMated(p)) {
+				gameOn = false;
+				System.out.println("Stale mate, game on: "+gameOn);
 				throw new StaleMateException();
+			}
 		}
+	}
+	
+	private boolean mated(Player player) {
+		ArrayList<Piece> teamMates = player.pieces();
+		if (player.isChecked()) {
+			if (player.isMated()) {
+				gameOn = false;
+				System.out.println("Mate, game on: "+gameOn);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean staleMated(Player player) {
+		boolean staleMate = true;
+		for (Piece piece : player.pieces()) {
+			if (!piece.legalMoves().isEmpty()) {
+				staleMate = false;
+				break;
+			}
+		}
+		return staleMate;
 	}
 		
 	private void enPassant(Piece movingPiece, Square destination) {
@@ -204,11 +250,9 @@ public abstract class ChessGame {
 	public ArrayList<Piece> movedPieces() { return movedPieces; }
 	
 	public void changePlayer() { 
-//		System.out.println("Player: " + player + ":  " + currentPlayer);
 		this.player = (this.player+1)%2;
 		this.currentPlayer = (this.currentPlayer.equals(players[0])) ? players[1] : players[0];
-//		System.out.println("Player: " + player + ":  " + currentPlayer);
-		}
+	}
 	
 	public int player() { return player; }
 	
@@ -216,16 +260,16 @@ public abstract class ChessGame {
 		int newPlayer = this.player;
 		
 		while (this.player == newPlayer) {
+			System.out.println("Game on: "+gameOn);
 			Random generator = new Random();
-			int pieceNr = generator.nextInt(pieces.size());
-			Piece piece = pieces.get(pieceNr);
+			int pieceNr = generator.nextInt(currentPlayer.pieces().size());
+			Piece piece = currentPlayer.pieces().get(pieceNr);
 			
 			ArrayList<Square> possibleMoves = piece.legalMoves();
 			if (!possibleMoves.isEmpty()) {	
 				int moveNr = generator.nextInt(possibleMoves.size());
 				Square move = possibleMoves.get(moveNr);
 				play(piece, move);
-//				play(piece.row(),piece.column(),move.row(),move.column());
 			}
 		}
 	}
@@ -235,4 +279,122 @@ public abstract class ChessGame {
 	}
 	
 	public Player currentPlayer() { return currentPlayer; }
+	
+	public Player opponent() {
+		return (this.currentPlayer.equals(players[0])) ? players[1] : players[0];
+	}
+	private void pause() {
+		try {
+			TimeUnit.MILLISECONDS.sleep(10);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	private ArrayList<Piece> copyPieceList(ArrayList<Piece> list) {
+		ArrayList<Piece> pieces = new ArrayList<Piece>();
+		for (Piece piece : list) {
+			pieces.add(piece);
+		}
+		return pieces;
+	}
+	
+	int depth = 2;
+	double alpha;
+//	This favors pieces that are created first, I need to randomize.
+	public void minimax_move() throws MateException, StaleMateException {
+		Piece movingPiece = null;
+		Square destination = null;
+		System.out.println(currentPlayer().colour() == BLACK);
+		System.out.println(currentPlayer().colour());
+		System.out.println(currentPlayer() instanceof AIPlayer);
+		double v = (currentPlayer().colour() == BLACK) ? 1000 : -1000;
+		ArrayList<Piece> pieces = copyPieceList(currentPlayer().pieces());
+		
+		for (Piece piece : pieces) {
+			for (Square move : piece.legalMoves()) {
+				Square origin = piece.square();
+				Piece victim = move.piece();
+				this.move(piece, move);
+//				pause();
+				double vv = (currentPlayer().colour() == BLACK) ? max_Value(depth) : min_Value(depth);
+				boolean newBest = (currentPlayer().colour() == BLACK) ? vv < v : vv > v;
+				if (newBest) {
+					v = vv;
+					movingPiece = piece;
+					destination = move;
+				}
+//				Reset the pieces
+				this.move(piece, origin);
+				if (victim != null) {
+					move.placePiece(victim);
+					piece.enemies().add(victim);
+				}			
+			}	
+		}
+		System.out.println(movingPiece);
+		System.out.println(destination);
+		this.play(movingPiece, destination);
+		System.out.println("DONE!");
+		System.out.println(v);
+	}
+//	function for choosing the best for white
+	private double max_Value(int d) {
+		if (whitePlayer.isMated()) { return -1000; }
+		boolean staleMate = true;
+		if (d == 0) { return board().value(); }
+		
+		double v = -1000;
+
+		ArrayList<Piece> whitePieces = copyPieceList(whitePlayer.pieces());
+
+		for (Piece piece : whitePieces) {
+			staleMate = false;
+			for (Square move : piece.legalMoves()) {
+				Square origin = piece.square();
+				Piece victim = move.piece();
+				this.move(piece, move);
+//				pause();
+				double vv = min_Value(d-1);
+				v = Math.max(v, vv);
+//				Reset the pieces
+				this.move(piece, origin);
+				if (victim != null) {
+					move.placePiece(victim);
+					piece.enemies().add(victim);
+				}
+			}
+		}
+		if (staleMate) { return 0; }
+		return v;
+	}
+	
+//	function for choosing the best for black
+	private double min_Value(int d) {
+		if (blackPlayer.isMated()) { return 1000; }
+		boolean staleMate = true;
+		if (d == 0) { return board().value(); }
+		
+		double v = 1000;
+		ArrayList<Piece> blackPieces = copyPieceList(blackPlayer.pieces());
+		for (Piece piece : blackPieces) {
+			staleMate = false; 
+			for (Square move : piece.legalMoves()) {
+				Square origin = piece.square();
+				Piece victim = move.piece();
+				this.move(piece, move);
+//				pause();
+				double vv = max_Value(d-1);
+				v = Math.min(v, vv);
+//				Reset the pieces
+				this.move(piece, origin);
+				if (victim != null) {
+					move.placePiece(victim);
+					piece.enemies().add(victim);
+				}
+			}
+		}
+		if (staleMate) { return 0; }
+		return v;
+	}
 }
